@@ -76,6 +76,36 @@ def visualize(db_path: str = DB_PATH, out_dir: str = PLOTS_DIR):
         plt.close()
 
     bar(df5, "experience_range", "hires", "Hires by Experience Range", os.path.join(out_dir, "hires_by_experience.png"))
+
+    # Avg code challenge by technology
+    q_avg_cc_tech = """
+    SELECT 
+        dt.technology,
+        ROUND(AVG(f.code_challenge_score), 2) AS avg_code_challenge_score
+    FROM fact_application f
+    JOIN dim_technology dt ON dt.technology_key = f.technology_key
+    GROUP BY dt.technology
+    ORDER BY avg_code_challenge_score DESC;
+    """
+    df_avg_cc_tech = pd.read_sql_query(q_avg_cc_tech, sqlite3.connect(db_path))
+    if not df_avg_cc_tech.empty:
+        bar(df_avg_cc_tech, "technology", "avg_code_challenge_score", "Avg Code Challenge Score by Technology", os.path.join(out_dir, "avg_code_challenge_by_technology.png"))
+    
+    # Avg technical interview score by focus country
+    q_avg_tech_focus = """
+    SELECT 
+        c.country,
+        ROUND(AVG(f.technical_interview_score), 2) AS avg_technical_interview_score
+    FROM fact_application f
+    JOIN dim_country c ON c.country_key = f.country_key
+    WHERE c.country IN ('United States of America', 'Colombia', 'Brazil', 'Ecuador')
+    GROUP BY c.country
+    ORDER BY avg_technical_interview_score DESC;
+    """
+    df_avg_tech_focus = pd.read_sql_query(q_avg_tech_focus, sqlite3.connect(db_path))
+    if not df_avg_tech_focus.empty:
+        bar(df_avg_tech_focus, "country", "avg_technical_interview_score", "Avg Technical Interview Score (Focus Countries)", os.path.join(out_dir, "avg_technical_interview_score_focus_countries.png"))
+    
     print(f"Gráficas generadas en: {out_dir}")
 
 if __name__ == "__main__":

@@ -119,10 +119,7 @@ def build_fact(df, dims):
     fact["technology_key"] = fact["technology"].map(technology_map)
     fact["experience_key"] = fact["experience_range"].map(experience_map)
     fact["candidate_key"] = fact["email"].map(candidate_map)
-
-    # 🔥 hired = 1 si promedio > 7, else 0
-    fact["hired"] = (((fact["code_challenge_score"] + fact["technical_interview_score"]) / 2) > 7).astype(int)
-
+    fact["hired"] = ((fact["code_challenge_score"] >= 7) & (fact["technical_interview_score"] >= 7)).astype(int)
     return fact[[
         "candidate_key","date_key","country_key","seniority_key","technology_key","experience_key",
         "yoe","code_challenge_score","technical_interview_score","hired"

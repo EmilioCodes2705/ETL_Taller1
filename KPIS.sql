@@ -41,3 +41,22 @@ FROM fact_application f
 JOIN dim_experience e ON e.experience_key = f.experience_key
 GROUP BY e.experience_range
 ORDER BY e.experience_range;
+
+-- average_scores
+SELECT 
+    ROUND(AVG(f.code_challenge_score),2) AS avg_code_challenge_score,
+    ROUND(AVG(f.technical_interview_score),2) AS avg_technical_interview_score
+FROM fact_application f;
+
+-- hires_by_experience_range
+SELECT 
+    CASE 
+        WHEN yoe <= 2 THEN '0-2 years'
+        WHEN yoe BETWEEN 3 AND 5 THEN '3-5 years'
+        WHEN yoe BETWEEN 6 AND 10 THEN '6-10 years'
+        ELSE '10+ years'
+    END AS experience_range, 
+    SUM(hired) AS hires
+FROM fact_application
+GROUP BY experience_range
+ORDER BY experience_range;

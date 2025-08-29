@@ -32,12 +32,30 @@ ORDER BY c.country, d.year;
 SELECT ROUND(100.0 * SUM(f.hired) / COUNT(1), 2) AS hire_rate_percent
 FROM fact_application f;
 
--- hires_by_experience_and_avg_scores
-SELECT e.experience_range,
-       SUM(f.hired) AS hires,
-       ROUND(AVG(f.code_challenge_score),2) AS avg_code_challenge,
-       ROUND(AVG(f.technical_interview_score),2) AS avg_technical_interview
+-- average_scores
+SELECT 
+    ROUND(AVG(f.code_challenge_score),2) AS avg_code_challenge_score,
+    ROUND(AVG(f.technical_interview_score),2) AS avg_technical_interview_score
+FROM fact_application f;
+
+
+
+-- avg_code_challenge_by_technology
+SELECT 
+    dt.technology,
+    ROUND(AVG(f.code_challenge_score), 2) AS avg_code_challenge_score
 FROM fact_application f
-JOIN dim_experience e ON e.experience_key = f.experience_key
-GROUP BY e.experience_range
-ORDER BY e.experience_range;
+JOIN dim_technology dt ON dt.technology_key = f.technology_key
+GROUP BY dt.technology
+ORDER BY avg_code_challenge_score DESC;
+
+
+-- avg_technical_interview_score_by_focus_country
+SELECT 
+    c.country,
+    ROUND(AVG(f.technical_interview_score), 2) AS avg_technical_interview_score
+FROM fact_application f
+JOIN dim_country c ON c.country_key = f.country_key
+WHERE c.country IN ('United States of America', 'Colombia', 'Brazil', 'Ecuador')
+GROUP BY c.country
+ORDER BY avg_technical_interview_score DESC;
