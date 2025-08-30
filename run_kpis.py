@@ -1,25 +1,20 @@
 # -*- coding: utf-8 -*-
+from config import DB_PATH, KPI_SQL_PATH, KPI_DIR, OUT_DIR
 import os
 import argparse
 import sqlite3
 import pandas as pd
-from config import DB_PATH, KPI_SQL_PATH, OUT_DIR
 
-def run_kpis(db_path: str = DB_PATH, sql_path: str = KPI_SQL_PATH, out_dir: str = OUT_DIR):
-    os.makedirs(out_dir, exist_ok=True)
-    with open(sql_path, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    # Separamos por ; al final de cada sentencia conservando SQL multi-línea
-    statements = [s.strip() for s in content.split(";") if s.strip()]
+def run_kpis(db_path: str = DB_PATH, sql_path: str = KPI_SQL_PATH, kpi_dir: str = KPI_DIR):
+    os.makedirs(kpi_dir, exist_ok=True)
     con = sqlite3.connect(db_path)
-    for i, stmt in enumerate(statements, start=1):
-        try:
-            df = pd.read_sql_query(stmt, con)
-            df.to_csv(os.path.join(out_dir, f"kpi_{i:02d}.csv"), index=False, encoding="utf-8")
-            print(f"KPI {i:02d} OK -> kpi_{i:02d}.csv")
-        except Exception as e:
-            print(f"KPI {i:02d} ERROR: {e}")
+    with open(sql_path, "r", encoding="utf-8") as f:
+        queries = f.read().split(";")
+        for i, query in enumerate(queries):
+            query = query.strip()
+            if query and not query.startswith("--"):
+                df = pd.read_sql_query(query, con)
+                df.to_csv(os.path.join(kpi_dir, f'kpi_{i+1:02d}.csv'), index=False)
     con.close()
 
 if __name__ == "__main__":

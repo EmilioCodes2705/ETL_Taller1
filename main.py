@@ -1,7 +1,6 @@
-
 import os
 import argparse
-from config import OUT_DIR, KPI_SQL_PATH
+from config import DB_PATH, KPI_SQL_PATH, KPI_DIR, OUT_DIR
 from extract import extract
 from transform import transform
 from load_dw import load_dw
@@ -25,7 +24,12 @@ def main(csv_path: str, out_dir: str = OUT_DIR, sql_path: str = KPI_SQL_PATH):
             f.write(open("kpis.sql", "r", encoding="utf-8").read())
 
     # 4) Ejecutar KPIs
-    run_kpis(out_dir=out_dir)
+    def run_kpis(db_path: str = DB_PATH, sql_path: str = KPI_SQL_PATH, kpi_dir: str = KPI_DIR):
+        os.environ["DB_PATH"] = db_path
+        os.environ["SQL_PATH"] = sql_path
+        os.environ["KPI_DIR"] = kpi_dir
+        os.makedirs(kpi_dir, exist_ok=True)
+        run_kpis()
 
     # 5) Visualizar
     visualize()
